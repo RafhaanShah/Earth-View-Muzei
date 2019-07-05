@@ -1,0 +1,39 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools" package="com.rafapps.earthviewformuzei">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <application android:allowBackup="false"
+                 android:label="@string/app_name"
+                 android:icon="@mipmap/ic_launcher"
+                 android:roundIcon="@mipmap/ic_launcher_round"
+                 android:supportsRtl="true"
+                 android:theme="@style/AppTheme"
+                 tools:ignore="GoogleAppIndexingWarning">
+
+
+        <service android:name=".EarthViewArtSource"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.apps.muzei.api.MuzeiArtSource"/>
+            </intent-filter>
+            <meta-data
+                    android:name="replacement"
+                    android:value="$com.rafapps.earthviewformuzei"/>
+        </service>
+
+        <provider
+                android:name="com.rafapps.earthviewformuzei.EarthViewArtProvider"
+                android:authorities="com.example.coolartwork"
+                android:label="@string/provider_name"
+                android:description="@string/provider_description"
+                android:exported="true"
+                android:permission=
+                        "com.google.android.apps.muzei.api.ACCESS_PROVIDER">
+            <intent-filter>
+                <action android:name="com.google.android.apps.muzei.api.MuzeiArtProvider"/>
+            </intent-filter>
+        </provider>
+
+    </application>
+</manifest>
