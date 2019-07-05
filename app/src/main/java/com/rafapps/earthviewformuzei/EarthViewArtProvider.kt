@@ -14,6 +14,5 @@ class EarthViewArtProvider : MuzeiArtProvider() {
 
     override fun openFile(artwork: Artwork): InputStream {
         return URL(artwork.webUri.toString()).openStream()
-
     }
 }

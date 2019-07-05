@@ -1,0 +1,3 @@
+package com.rafapps.earthviewformuzei
+
+class EarthViewImagePicker
