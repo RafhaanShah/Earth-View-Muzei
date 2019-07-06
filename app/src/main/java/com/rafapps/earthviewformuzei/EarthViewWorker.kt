@@ -12,12 +12,18 @@ import com.google.android.apps.muzei.api.provider.ProviderContract
 import org.json.JSONObject
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 
 class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
-
     companion object {
+
+        const val JSON_URL = "https://www.gstatic.com/prettyearth/assets/data/v2/"
+        const val IMAGE_URL = "https://www.gstatic.com/prettyearth/assets/full/"
+        const val JSON = ".json"
+        const val JPG = ".jpg"
+
         internal fun enqueueLoad() {
             val workManager = WorkManager.getInstance()
             workManager.enqueue(
@@ -35,32 +41,53 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
     override fun doWork(): Result {
         Log.v("EarthView", "Do Work")
 
-        val jsonURL = "https://www.gstatic.com/prettyearth/assets/data/v2/2323.json"
-        val imgURL = "https://www.gstatic.com/prettyearth/assets/full/2323.jpg"
-
+        val imgNum = EarthViewImagePicker.getImageNumber()
         val future = RequestFuture.newFuture<JSONObject>()
-        val request = JsonObjectRequest(jsonURL, null, future, future)
+        val request = JsonObjectRequest(JSON_URL + imgNum + JSON, null, future, future)
+
+        Log.v("EarthView", "Image Number: $imgNum")
 
         Volley.newRequestQueue(applicationContext).add(request)
 
         return try {
-            val response = future.get(30, TimeUnit.SECONDS)
+            val response = future.get(60, TimeUnit.SECONDS)
             val providerClient = ProviderContract.getProviderClient(
-                applicationContext, "com.rafapps.earthviewformuzei"
+                applicationContext, applicationContext.getString(R.string.package_name)
             )
 
+            val attribution = response.getString("attribution")
+            val geocode = response.getJSONObject("geocode")
+            val country = geocode.optString("country", "")
+            val locality = geocode.optString("locality", "")
+            val area = geocode.optString("administrative_area_level_1", "")
+
+            val title = sequenceOf(locality, area, country)
+                .filter { it.isNotEmpty() }
+                .joinToString(separator = ", ") { it }
+
+            Log.v("EarthView", "Area: $title")
+
             val art = Artwork.Builder()
-                .webUri(Uri.parse(imgURL))
-                .title(response.getJSONObject("geocode").getString("country"))
-                .byline(response.getString("attribution"))
+                .webUri(Uri.parse(IMAGE_URL + imgNum + JPG))
+                .title(title)
+                .byline(attribution)
                 .build()
 
             providerClient.addArtwork(art)
+
+            Log.v("EarthView", "Success")
             Result.success()
+
         } catch (e: InterruptedException) {
+            Log.v("EarthView Interrupted", e.toString())
+            Result.retry()
+
+        } catch (e: TimeoutException) {
+            Log.v("EarthView Timeout", e.toString())
             Result.retry()
 
         } catch (e: ExecutionException) {
+            Log.v("EarthView Execution", e.toString())
             Result.failure()
 
         }

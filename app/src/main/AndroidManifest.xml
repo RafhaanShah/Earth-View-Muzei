@@ -15,7 +15,7 @@
 
         <provider
                 android:name="com.rafapps.earthviewformuzei.EarthViewArtProvider"
-                android:authorities="com.rafapps.earthviewformuzei"
+                android:authorities="@string/package_name "
                 android:label="@string/provider_name"
                 android:description="@string/provider_description"
                 android:exported="true"
