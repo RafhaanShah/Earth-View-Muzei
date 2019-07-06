@@ -1,14 +1,49 @@
 package com.rafapps.earthviewformuzei
 
+import android.content.Context
+import android.preference.PreferenceManager
+import android.text.TextUtils
 import kotlin.random.Random
 
 class EarthViewImagePicker {
 
     companion object {
 
+        private const val maxNumberOfPastImages = 100
+        private const val previousImages = "PREVIOUS_IMAGES"
 
-        fun getImageNumber(): String {
-            return imageIDs[Random.nextInt(imageIDs.size)]
+        fun getImageNumber(context: Context): String {
+
+            //TODO: Clear app cache periodically
+
+            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val stringList = sharedPrefs.getString(previousImages, "")
+            var newStringList = ""
+            var img: String
+
+            if (TextUtils.isEmpty(stringList)) {
+                img = imageIDs[Random.nextInt(imageIDs.size)]
+                newStringList += img
+
+            } else {
+                val list = mutableListOf<String>()
+                list.addAll(TextUtils.split(stringList, ";"))
+                img = imageIDs[Random.nextInt(imageIDs.size)]
+
+                while (list.contains(img)) {
+                    img = imageIDs[Random.nextInt(imageIDs.size)]
+                }
+
+                if (list.size == maxNumberOfPastImages) {
+                    list.removeAt(0)
+                }
+
+                list.add(img)
+                newStringList = TextUtils.join(";", list)
+            }
+
+            sharedPrefs.edit().putString(previousImages, newStringList).apply()
+            return img
         }
 
         private val imageIDs = listOf(
@@ -1530,7 +1565,6 @@ class EarthViewImagePicker {
             "7021",
             "7023"
         )
-
     }
 }
 

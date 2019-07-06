@@ -41,9 +41,10 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
     override fun doWork(): Result {
         Log.v("EarthView", "Do Work")
 
-        val imgNum = EarthViewImagePicker.getImageNumber()
+        val imgNum = EarthViewImagePicker.getImageNumber(applicationContext)
         val future = RequestFuture.newFuture<JSONObject>()
         val request = JsonObjectRequest(JSON_URL + imgNum + JSON, null, future, future)
+        //request.setShouldCache(false)
 
         Log.v("EarthView", "Image Number: $imgNum")
 
@@ -68,6 +69,7 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
             Log.v("EarthView", "Area: $title")
 
             val art = Artwork.Builder()
+                .persistentUri(Uri.parse(IMAGE_URL + imgNum + JPG))
                 .webUri(Uri.parse(IMAGE_URL + imgNum + JPG))
                 .title(title)
                 .byline(attribution)
