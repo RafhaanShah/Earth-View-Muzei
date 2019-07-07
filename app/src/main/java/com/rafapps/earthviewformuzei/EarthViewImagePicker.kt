@@ -3,7 +3,9 @@ package com.rafapps.earthviewformuzei
 import android.content.Context
 import android.preference.PreferenceManager
 import android.text.TextUtils
+import java.io.File
 import kotlin.random.Random
+
 
 class EarthViewImagePicker {
 
@@ -11,11 +13,14 @@ class EarthViewImagePicker {
 
         private const val maxNumberOfPastImages = 100
         private const val previousImages = "PREVIOUS_IMAGES"
+        private const val maxAge: Long = 604800000
 
         fun getImageNumber(context: Context): String {
+            clearCache(context)
+            return getNewImage(context)
+        }
 
-            //TODO: Clear app cache periodically
-
+        private fun getNewImage(context: Context): String {
             val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
             val stringList = sharedPrefs.getString(previousImages, "")
             var newStringList = ""
@@ -44,6 +49,20 @@ class EarthViewImagePicker {
 
             sharedPrefs.edit().putString(previousImages, newStringList).apply()
             return img
+        }
+
+        private fun clearCache(context: Context) {
+            for (f in getCacheFiles(context, maxAge))
+                f.delete()
+        }
+
+        private fun getCacheFiles(context: Context, maxAge: Long): List<File> {
+            val dirs = context.cacheDir.listFiles { f -> f.isDirectory }
+            val files = mutableListOf<File>()
+            for (d in dirs) {
+                files.addAll(d.listFiles { f -> !f.isDirectory && f.lastModified() < System.currentTimeMillis() - maxAge })
+            }
+            return files
         }
 
         private val imageIDs = listOf(
