@@ -44,7 +44,6 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
         val imgNum = EarthViewImagePicker.getImageNumber(applicationContext)
         val future = RequestFuture.newFuture<JSONObject>()
         val request = JsonObjectRequest(JSON_URL + imgNum + JSON, null, future, future)
-        //request.setShouldCache(false)
 
         Log.v("EarthView", "Image Number: $imgNum")
 
@@ -60,19 +59,23 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
             val geocode = response.getJSONObject("geocode")
             val country = geocode.optString("country", "")
             val locality = geocode.optString("locality", "")
-            val area = geocode.optString("administrative_area_level_1", "")
+            val area1 = geocode.optString("administrative_area_level_1", "")
+            val area2 = geocode.optString("administrative_area_level_2", "")
+            val area3 = geocode.optString("administrative_area_level_3", "")
 
-            val title = sequenceOf(locality, area, country)
+            val byline = sequenceOf(locality, area1, area2, area3)
                 .filter { it.isNotEmpty() }
                 .joinToString(separator = ", ") { it }
 
-            Log.v("EarthView", "Area: $title")
+            Log.v("EarthView", "Area: $byline")
 
             val art = Artwork.Builder()
                 .persistentUri(Uri.parse(IMAGE_URL + imgNum + JPG))
                 .webUri(Uri.parse(IMAGE_URL + imgNum + JPG))
-                .title(title)
-                .byline(attribution)
+                .title(country)
+                .byline(byline)
+                .attribution(attribution)
+                .metadata(imgNum)
                 .build()
 
             providerClient.addArtwork(art)
