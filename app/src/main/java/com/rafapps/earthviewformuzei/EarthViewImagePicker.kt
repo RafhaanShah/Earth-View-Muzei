@@ -3,17 +3,15 @@ package com.rafapps.earthviewformuzei
 import android.content.Context
 import android.preference.PreferenceManager
 import android.text.TextUtils
-import java.io.File
+import com.rafapps.earthviewformuzei.EarthViewCacheManager.Companion.clearCache
 import kotlin.random.Random
-
 
 class EarthViewImagePicker {
 
     companion object {
 
         private const val maxNumberOfPastImages = 100
-        private const val previousImages = "PREVIOUS_IMAGES"
-        private const val maxAge: Long = 604800000
+        private const val PREFERENCE_PREVIOUS_IMAGES = "PREFERENCE_PREVIOUS_IMAGES"
 
         fun getImageNumber(context: Context): String {
             clearCache(context)
@@ -22,7 +20,7 @@ class EarthViewImagePicker {
 
         private fun getNewImage(context: Context): String {
             val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val stringList = sharedPrefs.getString(previousImages, "")
+            val stringList = sharedPrefs.getString(PREFERENCE_PREVIOUS_IMAGES, "")
             var newStringList = ""
             var img: String
 
@@ -39,7 +37,7 @@ class EarthViewImagePicker {
                     img = imageIDs[Random.nextInt(imageIDs.size)]
                 }
 
-                if (list.size == maxNumberOfPastImages) {
+                if (list.size >= maxNumberOfPastImages) {
                     list.removeAt(0)
                 }
 
@@ -47,22 +45,8 @@ class EarthViewImagePicker {
                 newStringList = TextUtils.join(";", list)
             }
 
-            sharedPrefs.edit().putString(previousImages, newStringList).apply()
+            sharedPrefs.edit().putString(PREFERENCE_PREVIOUS_IMAGES, newStringList).apply()
             return img
-        }
-
-        private fun clearCache(context: Context) {
-            for (f in getCacheFiles(context, maxAge))
-                f.delete()
-        }
-
-        private fun getCacheFiles(context: Context, maxAge: Long): List<File> {
-            val dirs = context.cacheDir.listFiles { f -> f.isDirectory }
-            val files = mutableListOf<File>()
-            for (d in dirs) {
-                files.addAll(d.listFiles { f -> !f.isDirectory && f.lastModified() < System.currentTimeMillis() - maxAge })
-            }
-            return files
         }
 
         private val imageIDs = listOf(

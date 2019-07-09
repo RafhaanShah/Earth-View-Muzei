@@ -2,7 +2,6 @@ package com.rafapps.earthviewformuzei
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.work.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.RequestFuture
@@ -14,13 +13,13 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-
 class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
     companion object {
 
         const val JSON_URL = "https://www.gstatic.com/prettyearth/assets/data/v2/"
         const val IMAGE_URL = "https://www.gstatic.com/prettyearth/assets/full/"
+        const val WEB_URL = "https://earthview.withgoogle.com/"
         const val JSON = ".json"
         const val JPG = ".jpg"
 
@@ -38,14 +37,33 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
         }
     }
 
-    override fun doWork(): Result {
-        Log.v("EarthView", "Do Work")
+    private fun getArtwork(response: JSONObject, imgNum: String): Artwork {
+        val attribution = response.getString("attribution")
+        val geocode = response.getJSONObject("geocode")
+        val country = geocode.optString("country", "Unknown")
+        val locality = geocode.optString("locality", "")
+        val area1 = geocode.optString("administrative_area_level_1", "")
+        val area2 = geocode.optString("administrative_area_level_2", "")
+        val area3 = geocode.optString("administrative_area_level_3", "")
 
+        val byline = sequenceOf(locality, area1, area2, area3)
+            .filter { it.isNotEmpty() }
+            .joinToString(separator = ", ") { it }
+
+        return Artwork.Builder()
+            .persistentUri(Uri.parse(IMAGE_URL + imgNum + JPG))
+            .webUri(Uri.parse(WEB_URL + imgNum))
+            .title(country)
+            .byline(byline)
+            .attribution(attribution)
+            .metadata(imgNum)
+            .build()
+    }
+
+    override fun doWork(): Result {
         val imgNum = EarthViewImagePicker.getImageNumber(applicationContext)
         val future = RequestFuture.newFuture<JSONObject>()
         val request = JsonObjectRequest(JSON_URL + imgNum + JSON, null, future, future)
-
-        Log.v("EarthView", "Image Number: $imgNum")
 
         Volley.newRequestQueue(applicationContext).add(request)
 
@@ -55,46 +73,17 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
                 applicationContext, applicationContext.getString(R.string.package_name)
             )
 
-            val attribution = response.getString("attribution")
-            val geocode = response.getJSONObject("geocode")
-            val country = geocode.optString("country", "")
-            val locality = geocode.optString("locality", "")
-            val area1 = geocode.optString("administrative_area_level_1", "")
-            val area2 = geocode.optString("administrative_area_level_2", "")
-            val area3 = geocode.optString("administrative_area_level_3", "")
-
-            val byline = sequenceOf(locality, area1, area2, area3)
-                .filter { it.isNotEmpty() }
-                .joinToString(separator = ", ") { it }
-
-            Log.v("EarthView", "Area: $byline")
-
-            val art = Artwork.Builder()
-                .persistentUri(Uri.parse(IMAGE_URL + imgNum + JPG))
-                .webUri(Uri.parse(IMAGE_URL + imgNum + JPG))
-                .title(country)
-                .byline(byline)
-                .attribution(attribution)
-                .metadata(imgNum)
-                .build()
-
-            providerClient.addArtwork(art)
-
-            Log.v("EarthView", "Success")
+            providerClient.addArtwork(getArtwork(response, imgNum))
             Result.success()
 
         } catch (e: InterruptedException) {
-            Log.v("EarthView Interrupted", e.toString())
             Result.retry()
 
         } catch (e: TimeoutException) {
-            Log.v("EarthView Timeout", e.toString())
             Result.retry()
 
         } catch (e: ExecutionException) {
-            Log.v("EarthView Execution", e.toString())
             Result.failure()
-
         }
     }
 }
