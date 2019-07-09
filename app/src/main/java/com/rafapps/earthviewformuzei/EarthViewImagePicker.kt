@@ -3,7 +3,6 @@ package com.rafapps.earthviewformuzei
 import android.content.Context
 import android.preference.PreferenceManager
 import android.text.TextUtils
-import com.rafapps.earthviewformuzei.EarthViewCacheManager.Companion.clearCache
 import kotlin.random.Random
 
 class EarthViewImagePicker {
@@ -13,12 +12,7 @@ class EarthViewImagePicker {
         private const val maxNumberOfPastImages = 100
         private const val PREFERENCE_PREVIOUS_IMAGES = "PREFERENCE_PREVIOUS_IMAGES"
 
-        fun getImageNumber(context: Context): String {
-            clearCache(context)
-            return getNewImage(context)
-        }
-
-        private fun getNewImage(context: Context): String {
+        fun getNewImageNumber(context: Context): String {
             val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
             val stringList = sharedPrefs.getString(PREFERENCE_PREVIOUS_IMAGES, "")
             var newStringList = ""

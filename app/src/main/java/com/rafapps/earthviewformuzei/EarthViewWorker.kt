@@ -61,7 +61,7 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
     }
 
     override fun doWork(): Result {
-        val imgNum = EarthViewImagePicker.getImageNumber(applicationContext)
+        val imgNum = EarthViewImagePicker.getNewImageNumber(applicationContext)
         val future = RequestFuture.newFuture<JSONObject>()
         val request = JsonObjectRequest(JSON_URL + imgNum + JSON, null, future, future)
 
@@ -74,6 +74,7 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
             )
 
             providerClient.addArtwork(getArtwork(response, imgNum))
+            EarthViewCacheManager.clearCache(applicationContext)
             Result.success()
 
         } catch (e: InterruptedException) {
