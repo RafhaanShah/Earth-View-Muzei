@@ -10,20 +10,14 @@ All images are from https://earthview.withgoogle.com/ and this app is in no way 
 
 Inspired by the [Earth View from Google Earth](https://chrome.google.com/webstore/detail/earth-view-from-google-ea/bhloflhklmhfpedakmangadcdofhnnoh) Chrome extension by Google.
 
-<div class="row">
-  <div class="column">
-    <img src="https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot1.png" width=20% hspace=10>
-  </div>
-  <div class="column">
-    <img src="https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot2.png" width=20% hspace=10>
-  </div>
-   <div class="column">
-    <img src="https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot4.png" width=20% hspace=10>
-  </div>
-   <div class="column">
-    <img src="https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot5.png" width=20% hspace=10>
-  </div>
-</div>
+<table>
+  <tr>
+    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot1.png'></td>
+    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot2.png'></td>
+    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot4.png'></td>
+    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot5.png'></td>
+  </tr>
+</table>
 
 <a href='https://play.google.com/store/apps/details?id=com.rafapps.earthviewformuzei'><img width=200 alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
 
