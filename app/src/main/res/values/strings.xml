@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Earth View for Muzei</string>
-    <string name="provider_name">Earth View for Muzei Provider</string>
-    <string name="provider_description">Provides Earth View images for Muzei</string>
+    <string name="provider_name">Earth View for Muzei</string>
+    <string name="provider_description">Satellite imagery from Google Earth View</string>
     <string name="package_name">com.rafapps.earthviewformuzei</string>
 </resources>
