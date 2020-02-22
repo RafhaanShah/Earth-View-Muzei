@@ -13,18 +13,19 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+class EarthViewWorker(context: Context, workerParams: WorkerParameters) :
+    Worker(context, workerParams) {
 
     companion object {
 
-        const val JSON_URL = "https://www.gstatic.com/prettyearth/assets/data/v2/"
-        const val IMAGE_URL = "https://www.gstatic.com/prettyearth/assets/full/"
-        const val WEB_URL = "https://earthview.withgoogle.com/"
+        const val JSON_URL = "https://www.gstatic.com/prettyearth/assets/data/v3/"
+        const val IMAGE_URL = "https://earthview.withgoogle.com/download/"
+        const val WEB_URL = "https://g.co/ev/"
         const val JSON = ".json"
         const val JPG = ".jpg"
 
-        internal fun enqueueLoad() {
-            val workManager = WorkManager.getInstance()
+        internal fun enqueueLoad(context: Context) {
+            val workManager = WorkManager.getInstance(context)
             workManager.enqueue(
                 OneTimeWorkRequestBuilder<EarthViewWorker>()
                     .setConstraints(
@@ -38,25 +39,30 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
     }
 
     private fun getArtwork(response: JSONObject, imgNum: String): Artwork {
-        val attribution = response.getString("attribution")
-        val geocode = response.getJSONObject("geocode")
-        val country = geocode.optString("country", "Unknown")
-        val locality = geocode.optString("locality", "")
-        val area1 = geocode.optString("administrative_area_level_1", "")
-        val area2 = geocode.optString("administrative_area_level_2", "")
-        val area3 = geocode.optString("administrative_area_level_3", "")
+        val attribution = response.optString("attribution")
+        val geocode = response.optJSONObject("geocode")
 
-        val byline = sequenceOf(locality, area1, area2, area3)
-            .filter { it.isNotEmpty() }
-            .joinToString(separator = ", ") { it }
+        val optCountry = response.optString("country")
+        val country =
+            if (optCountry.isNotEmpty()) optCountry else geocode?.optString("country") ?: ""
+
+        val optRegion = response.optString("region")
+        val region =
+            if (optRegion.isNotEmpty()) optRegion else
+                listOf(
+                    geocode?.optString("locality") ?: "",
+                    geocode?.optString("administrative_area_level_2") ?: "",
+                    geocode?.optString("administrative_area_level_1") ?: ""
+                ).firstOrNull { it.isNotEmpty() } ?: ""
 
         return Artwork.Builder()
+            .attribution(attribution)
+            .byline(region)
+            .metadata(imgNum)
+            .title(country)
+            .token(imgNum)
             .persistentUri(Uri.parse(IMAGE_URL + imgNum + JPG))
             .webUri(Uri.parse(WEB_URL + imgNum))
-            .title(country)
-            .byline(byline)
-            .attribution(attribution)
-            .metadata(imgNum)
             .build()
     }
 
@@ -69,12 +75,11 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) : Worker
 
         return try {
             val response = future.get(60, TimeUnit.SECONDS)
-            val providerClient = ProviderContract.getProviderClient(
-                applicationContext, applicationContext.getString(R.string.package_name)
-            )
 
-            providerClient.addArtwork(getArtwork(response, imgNum))
+            ProviderContract.getProviderClient(applicationContext, EarthViewArtProvider::class.java)
+                .addArtwork(getArtwork(response, imgNum))
             EarthViewCacheManager.clearCache(applicationContext)
+
             Result.success()
 
         } catch (e: InterruptedException) {

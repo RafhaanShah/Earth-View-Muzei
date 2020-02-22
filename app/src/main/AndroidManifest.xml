@@ -1,29 +1,32 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools" package="com.rafapps.earthviewformuzei">
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.rafapps.earthviewformuzei">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:allowBackup="false"
-                 android:label="@string/app_name"
-                 android:icon="@mipmap/ic_launcher"
-                 android:roundIcon="@mipmap/ic_launcher"
-                 android:supportsRtl="true"
-                 android:theme="@style/AppTheme"
-                 tools:ignore="GoogleAppIndexingWarning">
+    <application
+            android:allowBackup="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme"
+            tools:ignore="GoogleAppIndexingWarning">
 
         <provider
-                android:name="com.rafapps.earthviewformuzei.EarthViewArtProvider"
-                android:authorities="@string/package_name "
-                android:label="@string/provider_name"
+                android:name=".EarthViewArtProvider"
+                android:authorities="${packageName}"
                 android:description="@string/provider_description"
                 android:exported="true"
+                android:label="@string/provider_label"
                 android:permission="com.google.android.apps.muzei.api.ACCESS_PROVIDER">
             <intent-filter>
-                <action android:name="com.google.android.apps.muzei.api.MuzeiArtProvider"/>
+                <action android:name="com.google.android.apps.muzei.api.MuzeiArtProvider" />
             </intent-filter>
         </provider>
 
     </application>
+
 </manifest>

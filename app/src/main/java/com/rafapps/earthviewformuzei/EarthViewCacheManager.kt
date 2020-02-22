@@ -1,26 +1,24 @@
 package com.rafapps.earthviewformuzei
 
 import android.content.Context
-import java.io.File
+import android.util.Log
 
 class EarthViewCacheManager {
 
     companion object {
 
-        private const val maxAge: Long = 604800000
+        private const val maxAge: Long = 604800000 // 7 days
 
         fun clearCache(context: Context) {
-            for (f in getCachedFiles(context, maxAge))
-                f.delete()
-        }
-
-        private fun getCachedFiles(context: Context, maxAge: Long): List<File> {
-            val dirs = context.cacheDir.listFiles { f -> f.isDirectory }
-            val files = mutableListOf<File>()
-            for (d in dirs) {
-                files.addAll(d.listFiles { f -> !f.isDirectory && f.lastModified() < System.currentTimeMillis() - maxAge })
+            try {
+                context.cacheDir.listFiles { a -> a.isDirectory }
+                    ?.forEach { b ->
+                        b?.listFiles { c -> c.isFile && c.lastModified() < (System.currentTimeMillis() - maxAge) }
+                            ?.forEach { d -> d.delete() }
+                    }
+            } catch (e: Exception) {
+                Log.d("EarthViewCacheManager", e.message ?: "Exception when clearing cache")
             }
-            return files
         }
     }
 }
