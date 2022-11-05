@@ -1,0 +1,6 @@
+- Plugin for Muzei to fetch satellite landscape imagery from Google Earth View.
+- This is NOT a standalone application, it requires the Muzei app by Roman Nurik and Ian Lake, available at http://get.muzei.co or by searching the Play Store for 'Muzei'.
+- Once both are installed, this app will appear in the Sources tab of Muzei, all other settings are controlled by Muzei. This app does not add any icons to your home screen.
+- Clicking the title of a picture in the Muzei app will open the Earth View page for that image in your web browser, and will allow you to download the image to your device.
+- All images are from https://earthview.withgoogle.com and this app is in no way affiliated with Google and does not own any of the images provided.
+- Inspired by the 'Earth View from Google Earth' Chrome extension by Google.

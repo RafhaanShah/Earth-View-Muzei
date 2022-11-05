@@ -1,0 +1,8 @@
+- Updated for Android 13
+
+------
+- Updated Google Earth View API and added their new images
+- https://www.blog.google/products/earth/most-stunning-images-from-google-earth
+
+------
+- Initial release
