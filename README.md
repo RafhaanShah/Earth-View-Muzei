@@ -12,10 +12,10 @@ Inspired by the [Earth View from Google Earth](https://chrome.google.com/webstor
 
 <table>
   <tr>
-    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot1.png'></td>
-    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot2.png'></td>
-    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot4.png'></td>
-    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/assets/screenshot5.png'></td>
+    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png'></td>
+    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png'></td>
+    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png'></td>
+    <td><img src='https://github.com/RafhaanShah/Earth-View-For-Muzei/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png'></td>
   </tr>
 </table>
 
