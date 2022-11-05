@@ -3,6 +3,7 @@ package com.rafapps.earthviewformuzei
 import android.content.Context
 import android.net.Uri
 import androidx.work.*
+import com.android.volley.Request.Method.GET
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.RequestFuture
 import com.android.volley.toolbox.Volley
@@ -44,16 +45,17 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) :
 
         val optCountry = response.optString("country")
         val country =
-            if (optCountry.isNotEmpty()) optCountry else geocode?.optString("country") ?: ""
+            optCountry.ifEmpty { geocode?.optString("country") ?: "" }
 
         val optRegion = response.optString("region")
         val region =
-            if (optRegion.isNotEmpty()) optRegion else
+            optRegion.ifEmpty {
                 listOf(
                     geocode?.optString("locality") ?: "",
                     geocode?.optString("administrative_area_level_2") ?: "",
                     geocode?.optString("administrative_area_level_1") ?: ""
                 ).firstOrNull { it.isNotEmpty() } ?: ""
+            }
 
         return Artwork.Builder()
             .attribution(attribution)
@@ -69,7 +71,13 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) :
     override fun doWork(): Result {
         val imgNum = EarthViewImagePicker.getNewImageNumber(applicationContext)
         val future = RequestFuture.newFuture<JSONObject>()
-        val request = JsonObjectRequest(JSON_URL + imgNum + JSON, null, future, future)
+        val request = JsonObjectRequest(
+            GET,
+            JSON_URL + imgNum + JSON,
+            null,
+            future,
+            future
+        )
 
         Volley.newRequestQueue(applicationContext).add(request)
 
