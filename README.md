@@ -20,6 +20,9 @@ Inspired by the [Earth View from Google Earth](https://chrome.google.com/webstor
 </table>
 
 <a href='https://play.google.com/store/apps/details?id=com.rafapps.earthviewformuzei'><img width=200 alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
+<a href='https://f-droid.org/packages/com.rafapps.earthviewformuzei/'><img width=200 alt='Get it on Google Play' src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png'/></a>
+
+or get the APK from the [Releases Section](https://github.com/RafhaanShah/Earth-View-Muzei/releases/latest).
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
