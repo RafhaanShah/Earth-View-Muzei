@@ -2,7 +2,14 @@ package com.rafapps.earthviewformuzei
 
 import android.content.Context
 import android.net.Uri
-import androidx.work.*
+import android.util.Base64
+import android.util.Log
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.android.volley.Request.Method.GET
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.RequestFuture
@@ -10,6 +17,8 @@ import com.android.volley.toolbox.Volley
 import com.google.android.apps.muzei.api.provider.Artwork
 import com.google.android.apps.muzei.api.provider.ProviderContract
 import org.json.JSONObject
+import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -19,13 +28,15 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) :
 
     companion object {
 
+        private val TAG = this::class.simpleName
+
         const val JSON_URL = "https://www.gstatic.com/prettyearth/assets/data/v3/"
-        const val IMAGE_URL = "https://earthview.withgoogle.com/download/"
-        const val WEB_URL = "https://g.co/ev/"
         const val JSON = ".json"
         const val JPG = ".jpg"
+        const val IMAGE = "image"
 
         internal fun enqueueLoad(context: Context) {
+            Log.d(TAG, "enqueueLoad")
             val workManager = WorkManager.getInstance(context)
             workManager.enqueue(
                 OneTimeWorkRequestBuilder<EarthViewWorker>()
@@ -39,7 +50,8 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) :
         }
     }
 
-    private fun getArtwork(response: JSONObject, imgNum: String): Artwork {
+    private fun getArtwork(response: JSONObject, imgNum: String): Artwork? {
+        Log.d(TAG, "getArtwork $imgNum, response length ${response.length()}")
         val attribution = response.optString("attribution")
         val geocode = response.optJSONObject("geocode")
 
@@ -57,18 +69,21 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) :
                 ).firstOrNull { it.isNotEmpty() } ?: ""
             }
 
+        val imageData = response.optString("dataUri")
+        val file = saveImage(imgNum, imageData) ?: return null
+
         return Artwork.Builder()
             .attribution(attribution)
             .byline(region)
             .metadata(imgNum)
             .title(country)
             .token(imgNum)
-            .persistentUri(Uri.parse(IMAGE_URL + imgNum + JPG))
-            .webUri(Uri.parse(WEB_URL + imgNum))
+            .persistentUri(Uri.fromFile(file))
             .build()
     }
 
     override fun doWork(): Result {
+        Log.d(TAG, "doWork")
         val imgNum = EarthViewImagePicker.getNewImageNumber(applicationContext)
         val future = RequestFuture.newFuture<JSONObject>()
         val request = JsonObjectRequest(
@@ -83,11 +98,14 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) :
 
         return try {
             val response = future.get(60, TimeUnit.SECONDS)
+            val artwork = getArtwork(response, imgNum) ?: return Result.failure()
 
-            ProviderContract.getProviderClient(applicationContext, EarthViewArtProvider::class.java)
-                .addArtwork(getArtwork(response, imgNum))
+            ProviderContract
+                .getProviderClient(applicationContext, EarthViewArtProvider::class.java)
+                .addArtwork(artwork)
             EarthViewCacheManager.clearCache(applicationContext)
 
+            Log.d(TAG, "doWork success")
             Result.success()
 
         } catch (e: InterruptedException) {
@@ -97,7 +115,28 @@ class EarthViewWorker(context: Context, workerParams: WorkerParameters) :
             Result.retry()
 
         } catch (e: ExecutionException) {
+            Log.d(TAG, "doWork failure")
             Result.failure()
         }
+    }
+
+    private fun saveImage(id: String, imageData: String): File? {
+        val base64Data = imageData.split(",").getOrNull(1) ?: return null
+        val imageBytes = Base64.decode(base64Data, Base64.DEFAULT)
+
+        val cacheDir = applicationContext.cacheDir
+        val file = File(cacheDir, "${IMAGE}-${id}${JPG}")
+
+        runCatching {
+            FileOutputStream(file).use { outputStream ->
+                outputStream.write(imageBytes)
+            }
+        }.onFailure {
+            Log.e(TAG, "saveImage", it)
+            return null
+        }
+
+        Log.d(TAG, "saveImage ${file.path}")
+        return file
     }
 }

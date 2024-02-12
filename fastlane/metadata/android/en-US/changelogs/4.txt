@@ -1,0 +1,1 @@
+- Fix image loading after the change in Earth View URLs
