@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 33
+    namespace 'com.rafapps.earthviewformuzei'
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 33
-        versionCode 3
-        versionName "2.1"
+        targetSdkVersion 34
+        compileSdk 34
+        versionCode 4
+        versionName "2.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     kotlinOptions {
@@ -29,13 +29,13 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.work:work-runtime-ktx:2.7.1'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
 
-    implementation 'com.google.android.apps.muzei:muzei-api:3.2.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.work:work-runtime-ktx:2.9.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+
+    implementation 'com.google.android.apps.muzei:muzei-api:3.4.1'
     implementation 'com.android.volley:volley:1.2.1'
 }
